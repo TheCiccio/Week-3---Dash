@@ -25,17 +25,25 @@ app.layout = html.Div(children=[html.H1('SpaceX Launch Records Dashboard',
                                 # The default select value is for ALL sites
                                 # dcc.Dropdown(id='site-dropdown',...)
                                 dcc.Dropdown( 
-                                    id='site-dropdown', 
-                                    options=[ 
-                                    {'label': 'All Sites', 'value': 'ALL'}, {'label': 'CCAFS LC-40', 'value': 'CCAFS LC-40'}, {'label': 'VAFB SLC-4E', 'value': 'VAFB SLC-4E'}, {'label': 'KSC LC-39A', 'value': 'KSC LC-39A'}, {'label': 'CCAFS SLC-40', 'value': 'CCAFS SLC-40'}, ], 
-                                    value='ALL', 
-                                    placeholder="Select a Launch Site", 
-                                    searchable=True),
-
+                                            id='site-dropdown', 
+                                            options=[ 
+                                                {'label': 'All Sites', 'value': 'ALL'}, 
+                                                {'label': 'CCAFS LC-40', 'value': 'CCAFS LC-40'}, 
+                                                {'label': 'VAFB SLC-4E', 'value': 'VAFB SLC-4E'}, 
+                                                {'label': 'KSC LC-39A', 'value': 'KSC LC-39A'}, 
+                                                {'label': 'CCAFS SLC-40', 'value': 'CCAFS SLC-40'},
+                                            ], 
+                                            value='ALL', 
+                                            placeholder="Select a Launch Site", 
+                                            searchable=True),
                                 html.Br(),
                                 # TASK 2: Add a pie chart to show the total successful launches count for all sites
                                 # If a specific launch site was selected, show the Success vs. Failed counts for the site
-                                html.Div(dcc.Graph(id='success-payload-scatter-chart')), ]) @app.callback(Output(component_id='success-pie-chart', component_property='figure'), Input(component_id='site-dropdown', component_property='value'))def get_pie(value):
+                                html.Div(dcc.Graph(id='success-payload-scatter-chart')), 
+                                           ]) 
+                                @app.callback(Output(component_id='success-pie-chart', component_property='figure'), 
+                                        Input(component_id='site-dropdown', component_property='value'))
+                                def get_pie(value):
                                     filtered_df = spacex_df
                                     if value == 'ALL':
                                         fig = px.pie(filtered_df, values='class', names='Launch Site', title='Total Success Launches By Site')
@@ -64,24 +72,22 @@ app.layout = html.Div(children=[html.H1('SpaceX Launch Records Dashboard',
                                 }),
                                 # TASK 4: Add a scatter chart to show the correlation between payload and launch success
                                 html.Div(dcc.Graph(id='success-payload-scatter-chart')),
-                                ])
-                                @app.callback(
-                                Output(component_id='success-payload-scatter-chart', component_property='figure'),
-                                [Input(component_id='site-dropdown', component_property='value'),
-                                Input(component_id='payload-slider', component_property='value')]
-                                )
+                                    @app.callback(Output(component_id='success-payload-scatter-chart', component_property='figure'),
+                                                [Input(component_id='site-dropdown', component_property='value'),
+                                                Input(component_id='payload-slider', component_property='value')]
+                                                )
 
-                                def get_scatter(value1,value2):
-                                    filtered_df2_1=spacex_df[(spacex_df['Payload mass (kg)'] > value2[0]) & (spacex_df['Payload Mass (kg)'] < value2[1])]
-                                    if value1=='ALL':
-                                        fig= px.scatter(filtered_df2_1,x="Payload Mass (kg)",y="class",color="Booster Version Category",\
-                                        title="Correlation between Payload and Success for All sites")
-                                        return fig
-                                    else :
-                                        filtered_df2_2=filtered_df2_1[filtered_df2_1['Launch Site']==value1]
-                                        fig= px.scatter(filtered_df2_2,x="Payload Mass (kg)",y="class",color="Booster Version Category",\
-                                        title=f"Correlation between Payload and Success for site {value1}")
-                                        return fig
+                                    def get_scatter(value1,value2):
+                                        filtered_df2_1=spacex_df[(spacex_df['Payload mass (kg)'] > value2[0]) & (spacex_df['Payload Mass (kg)'] < value2[1])]
+                                        if value1=='ALL':
+                                            fig= px.scatter(filtered_df2_1,x="Payload Mass (kg)",y="class",color="Booster Version Category",\
+                                            title="Correlation between Payload and Success for All sites")
+                                            return fig
+                                        else:
+                                            filtered_df2_2=filtered_df2_1[filtered_df2_1['Launch Site']==value1]
+                                            fig= px.scatter(filtered_df2_2,x="Payload Mass (kg)",y="class",color="Booster Version Category",\
+                                            title=f"Correlation between Payload and Success for site {value1}")
+                                            return fig
 # Run the app
 if __name__ == '__main__': app.run_server(mode='jupyterlab', port = 8090 ,dev_tools_ui=True, debug=True, dev_tools_hot_reload =True, threaded=True):
     app.run_server()
