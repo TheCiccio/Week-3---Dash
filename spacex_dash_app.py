@@ -10,7 +10,7 @@ from jupyter_dash import JupyterDash
 import plotly.graph_objects as go
 
 # Read the airline data into pandas dataframe
-spacex_df = pd.read_csv("spacex_launch_dash.csv")
+spacex_df = pd.read_csv("https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-DS0321EN-SkillsNetwork/datasets/spacex_launch_dash.csv")
 max_payload = spacex_df['Payload Mass (kg)'].max()
 min_payload = spacex_df['Payload Mass (kg)'].min()
 
@@ -41,53 +41,54 @@ app.layout = html.Div(children=[html.H1('SpaceX Launch Records Dashboard',
                                 # If a specific launch site was selected, show the Success vs. Failed counts for the site
                                 html.Div(dcc.Graph(id='success-payload-scatter-chart')), 
                                            ]) 
-                                @app.callback(Output(component_id='success-pie-chart', component_property='figure'), 
-                                        Input(component_id='site-dropdown', component_property='value'))
-                                def get_pie(value):
-                                    filtered_df = spacex_df
-                                    if value == 'ALL':
-                                        fig = px.pie(filtered_df, values='class', names='Launch Site', title='Total Success Launches By Site')
-                                        return fig
+@app.callback(Output(component_id='success-pie-chart', component_property='figure'), 
+        Input(component_id='site-dropdown', component_property='value'))
+def get_pie(value):
+    filtered_df = spacex_df
+    if value == 'ALL':
+        fig = px.pie(filtered_df, values='class', names='Launch Site', title='Total Success Launches By Site')
+        return fig
 
-                                    else:
-                                        filtered_df = spacex_df[spacex_df['Launch Site'] == value].groupby(['Launch Site', 'class']). \
-                                        size().reset_index(name='class count')
-                                        title = f"Total Success Launches for site {value}"
-                                        fig = px.pie(filtered_df,values='class count', names='class', title=title)
-                                        return fig
-                                html.P("Payload range (Kg):"),
-                                # TASK 3: Add a slider to select payload range
-                                #dcc.RangeSlider(id='payload-slider',...)
-                                dcc.RangeSlider(id='payload-slider',
-                                min=0,
-                                max=10000,
-                                step=1000,
-                                value=[min_payload,max_payload],
-                                marks={
-                                0: '0 kg',
-                                2500: '2500',
-                                5000: '5000',
-                                7500: '7500',
-                                10000: '10000'
-                                }),
-                                # TASK 4: Add a scatter chart to show the correlation between payload and launch success
-                                html.Div(dcc.Graph(id='success-payload-scatter-chart')),
-                                    @app.callback(Output(component_id='success-payload-scatter-chart', component_property='figure'),
-                                                [Input(component_id='site-dropdown', component_property='value'),
-                                                Input(component_id='payload-slider', component_property='value')]
-                                                )
+    else:
+        filtered_df = spacex_df[spacex_df['Launch Site'] == value].groupby(['Launch Site', 'class']). \
+        size().reset_index(name='class count')
+        title = f"Total Success Launches for site {value}"
+        fig = px.pie(filtered_df,values='class count', names='class', title=title)
+        return fig
+html.P("Payload Range (Kg):"),
+# TASK 3: Add a slider to select payload range
+#dcc.RangeSlider(id='payload-slider',...)
+dcc.RangeSlider(id='payload-slider',
+min=0,
+max=10000,
+step=1000,
+value=[min_payload,max_payload],
+marks={
+    0: '0 kg',
+    2500: '2500',
+    5000: '5000',
+    7500: '7500',
+    10000: '10000'
+    }),
+# TASK 4: Add a scatter chart to show the correlation between payload and launch success
+html.Div(dcc.Graph(id='success-payload-scatter-chart')),
+@app.callback(Output(component_id='success-payload-scatter-chart', component_property='figure'),
+        [Input(component_id='site-dropdown', component_property='value'),
+        Input(component_id='payload-slider', component_property='value')]
+        )
 
-                                    def get_scatter(value1,value2):
-                                        filtered_df2_1=spacex_df[(spacex_df['Payload mass (kg)'] > value2[0]) & (spacex_df['Payload Mass (kg)'] < value2[1])]
-                                        if value1=='ALL':
-                                            fig= px.scatter(filtered_df2_1,x="Payload Mass (kg)",y="class",color="Booster Version Category",\
-                                            title="Correlation between Payload and Success for All sites")
-                                            return fig
-                                        else:
-                                            filtered_df2_2=filtered_df2_1[filtered_df2_1['Launch Site']==value1]
-                                            fig= px.scatter(filtered_df2_2,x="Payload Mass (kg)",y="class",color="Booster Version Category",\
-                                            title=f"Correlation between Payload and Success for site {value1}")
-                                            return fig
+def get_scatter(value1,value2):
+    filtered_df2_1=spacex_df[(spacex_df['Payload mass (kg)'] > value2[0]) & (spacex_df['Payload Mass (kg)'] < value2[1])]
+    if value1=='ALL':
+        fig= px.scatter(filtered_df2_1,x="Payload Mass (kg)",y="class",color="Booster Version Category",\
+        title="Correlation between Payload and Success for All sites")
+        return fig
+    else:
+        filtered_df2_2=filtered_df2_1[filtered_df2_1['Launch Site']==value1]
+        fig= px.scatter(filtered_df2_2,x="Payload Mass (kg)",y="class",color="Booster Version Category",\
+        title=f"Correlation between Payload and Success for site {value1}")
+        return fig
 # Run the app
-if __name__ == '__main__': app.run_server(mode='jupyterlab', port = 8090 ,dev_tools_ui=True, debug=True, dev_tools_hot_reload =True, threaded=True):
-    app.run_server()
+if __name__ == '__main__': app.run_server(mode='jupyterlab', port = 8090 ,dev_tools_ui=True, #debug=True,
+              dev_tools_hot_reload =True, threaded=True)
+app.run_server()
